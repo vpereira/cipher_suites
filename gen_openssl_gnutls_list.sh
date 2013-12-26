@@ -1,6 +1,8 @@
 #!/bin/bash
-openssl ciphers  -V 'ALL@STRENGTH' | awk '{ print "\""$1"\""","$3 }' > openssl.csv
-gnutls-cli --list | grep '^TLS_' | sed 's/\s\s*/ /g'  | awk '{ print "\""$2$3"\""","$1 }' > gnutls.csv
+#openssl ciphers  -V 'ALL@STRENGTH' | awk '{ print "\""$1"\""","$3 }' > openssl.csv
+#gnutls-cli --list | grep '^TLS_' | sed 's/\s\s*/ /g'  | awk '{ print "\""$2$3"\""","$1 }' > gnutls.csv
+ruby parse_openssl.rb > openssl.csv
+ruby parse_gnutls.rb  > gnutls.csv 
 #TODO
 #check if the file exists locally
 #wget default names (as it is in the standars
@@ -13,4 +15,5 @@ grep '^\"0x' tls-parameters_temp.csv  > standard.csv
 rm -f tls-parameters_temp.csv
 rm -f tls-parameters-4.csv
 #
+# TODO add the method to search described here:
 #http://backreference.org/2009/11/18/openssl-vs-gnutls-cipher-names/
