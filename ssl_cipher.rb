@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'active_record'
 require 'csv'
 
