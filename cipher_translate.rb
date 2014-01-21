@@ -14,32 +14,44 @@ def print_gnutls_to_openssl
         name, id_1, id_2, protocol = cipher_line.split
         keys_to_search << "#{id_1}#{id_2}" if id_1 =~ /^0x/
     end
-    search_csv("gnutls_to_openssl",keys_to_search)
+    find_entries(:cipher_id,keys_to_search).each do |r|
+        puts "#{r[2]} -> #{r[1]}"
+    end
 end
  
 def print_openssl_to_gnutls
     keys_to_search = [] 
     STDIN.each_line do |cipher_line|
-        keys_to_search = cipher_line.split(':').collect
+        cipher_id = cipher_line.split('-')[0]
+        cipher_id.gsub!(/\s+/,"")
+        keys_to_search << cipher_id
     end
-    search_csv("openssl_to_gnutls",keys_to_search)
+    find_entries(:cipher_id,keys_to_search).each do |r|
+        puts "#{r[1]} -> #{r[2]}"
+    end
 end
 
-def search_csv(mode = "gnutls_to_openssl",keys_to_search = [])
-    options = { :headers => :first_row }
+def open_table
+    CSV.table('cipherlist_db.csv')
+end
 
-    f1,f2,f3 = if mode == "gnutls_to_openssl"
-                   ["cipher_id","gnutls","openssl"]
-               else
-                   ["openssl","openssl","gnutls"]
-               end
-    CSV.open( "cipherlist_db.csv", "r", options ) do |csv|
-        csv.find_all do |row|
-            if keys_to_search.include? row[f1]
-                puts "#{row[f2]} -> #{row[f3]}"
-            end
-        end
+def get_csv_column(column = :cipher_id)
+    open_table.by_col[column]
+end
+
+def get_csv_row
+    open_table.by_row
+end
+
+def get_csv_rows(rows = [])
+    rows.collect { |r| get_csv_row[r] }
+end
+
+def find_entries(column = :cipher_id, keys_to_search = [])
+    found_keys = keys_to_search.collect do |k|
+        get_csv_column(column).index(k)
     end
+    get_csv_rows(found_keys.compact)
 end
 
 if $0 == __FILE__
@@ -53,5 +65,4 @@ if $0 == __FILE__
             print_help
         end
     end 
-
 end
