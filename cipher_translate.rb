@@ -63,6 +63,15 @@ def translate_openssl_to_gnutls
     keys_to_search
 end
 
+def translate_get_cipher_to_gnutls
+    keys_to_search = []
+    STDIN.each_line do |cipher_line|
+        cipher_name = cipher_line.split[2] #debug mode isnt supported
+        keys_to_search << cipher_name if cipher_name
+    end
+    keys_to_search
+end
+
 if $0 == __FILE__
     mode = 0
     ARGV.each do |a|
@@ -73,14 +82,23 @@ if $0 == __FILE__
         when "openssl_to_gnutls"
             mode = 2
             translate_openssl_to_gnutls
+        when "get_cipher_to_gnutls"
+            mode = 3
+            translate_get_cipher_to_gnutls
         else
             print_help
         end
         if mode > 0
-            CipherTable.new.find_entries(:cipher_id,keys_to_search).each do |r|
-                if mode == 1 
-                    puts "#{r[2]} -> #{r[1]}"
-                else
+            if mode < 3
+                CipherTable.new.find_entries(:cipher_id,keys_to_search).each do |r|
+                    if mode == 1 
+                        puts "#{r[2]} -> #{r[1]}"
+                    else
+                        puts "#{r[1]} -> #{r[2]}"
+                    end
+                end
+            else
+                CipherTable.new.find_entries(:openssl,keys_to_search).each do |r|
                     puts "#{r[1]} -> #{r[2]}"
                 end
             end

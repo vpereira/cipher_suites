@@ -15,6 +15,7 @@ opts = Trollop::options do
     opt :sslv3,"SSLv3", :default=>false
     opt :host, "hostname", :type=>:string
     opt :port, "port", :type=>:int
+    opt :debug, "debug info", :default=>false
 end
 
 
@@ -44,9 +45,9 @@ OpenSSL::SSL::SSLContext.new(protocol).ciphers.each do |cipher_name, cipher_vers
             ssl_client.connect
         end
     rescue OpenSSL::SSL::SSLError => e
-        puts "[-] Rejected\t #{cipher_name}\t #{cipher_version}"
+        puts "[-] Rejected\t #{cipher_name}\t #{cipher_version}" if opts[:debug]
     rescue Timeout::Error => f
-        puts "[x] Timeout\t  #{cipher_name}\t #{cipher_version}"
+        puts "[x] Timeout\t  #{cipher_name}\t #{cipher_version}" if opts[:debug]
     rescue #Ignore all other Exceptions
     else
         puts "[+] Accepted\t #{cipher_name}\t #{cipher_version}"
